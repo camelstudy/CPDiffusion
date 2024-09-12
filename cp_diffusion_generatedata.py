@@ -1,6 +1,6 @@
 # _*_coding:utf-8_*_
-from cp_diffusion.cp_diffusion_model import ConditionalDDPMPipeline
-from cp_diffusion.generate import generate_labels
+from cp_diffusion.cp_diffusion_model import ConditionalDDPMPipeline,ConditionEmbedding
+from cp_diffusion.generate import generate_labels,decoder2seq
 from config_file import TrainingConfig
 
 config = TrainingConfig()
@@ -9,13 +9,18 @@ config = TrainingConfig()
 loaded_pipeline = ConditionalDDPMPipeline.from_pretrained(config.output_dir)
 
 # Labels for generation
+condition_embedding = ConditionEmbedding(4, 128)
 
 labels = [1,1,1,35]
 generate_condition = generate_labels(labels, config)
 
 # 使用加载的 pipeline 进行生成
-generated_images = loaded_pipeline(
+generate = loaded_pipeline(
     batch_size=config.eval_batch_size,
-    condition_embedding=generate_condition,
+    condition_embedding=condition_embedding(generate_condition),
     num_inference_steps=1000
 )
+for i, data in enumerate(generate):
+    # print(data.shape)
+    rd = decoder2seq(data)
+    print(f"Generated sample {i}: {rd}")

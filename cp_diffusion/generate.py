@@ -8,6 +8,7 @@ def generate_labels(label,config):
 
 
 def decoder2seq(x):
+    x = torch.squeeze(x,dim=0)
     seq = ''
     for i in range(x.shape[0]):
         bases = x[i]
